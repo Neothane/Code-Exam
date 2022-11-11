@@ -1,25 +1,26 @@
 <template>
-  <ToDoList />
+  <nav>
+    <router-link to="/">Home</router-link> |
+    <router-link to="/about">About</router-link>
+  </nav>
+  <router-view />
 </template>
 
-<script>
-import ToDoList from "./components/ToDoList.vue";
-
-export default {
-  name: "App",
-  components: {
-    ToDoList,
-  },
-};
-</script>
-
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: left;
+html {
+  height: 100vh;
+  background-color: antiquewhite;
+}
+nav {
+  padding: 10px 20px;
+}
+
+nav a {
+  font-weight: bold;
   color: #2c3e50;
-  margin-top: 60px;
+}
+
+nav a.router-link-exact-active {
+  color: #42b983;
 }
 </style>

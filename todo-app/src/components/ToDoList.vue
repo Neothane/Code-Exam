@@ -1,26 +1,13 @@
 <template>
   <div>
-    <img alt="Vue logo" src="../assets/do-it-now.png" />
     <h1>
+      <img alt="Vue logo" src="../assets/do-it-now.png" />
       List Of Items To-Do
-      <button type="button" @click="load()" :disabled="saving">Reload</button>
-    </h1>
-    <div v-if="edit">
-      <label v-if="edit.id == undefined">New Task: </label>
-      <label v-if="edit.id != undefined">Edit Task {{ edit.id }}: </label>
-      <input
-        type="text"
-        :value="edit.task"
-        @input="(event) => (edit.task = event.target.value)"
-      />
-      <button type="button" @click="save()" :disabled="saving">Save</button>
-      <button type="button" @click="edit = null" :disabled="saving">
-        Clear
+      <button class="info" type="button" @click="load()" :disabled="saving">
+        Reload
       </button>
-    </div>
-    <div v-if="!edit">
-      <button type="button" @click="edit = { task: '' }">Add New Task</button>
-    </div>
+    </h1>
+
     <table>
       <thead>
         <tr>
@@ -36,6 +23,7 @@
           <td>{{ todo.task }}</td>
           <td>
             <button
+              class="info"
               type="button"
               @click="edit = { id: todo.id, task: todo.task }"
               :disabled="saving"
@@ -44,18 +32,55 @@
             </button>
           </td>
           <td>
-            <button type="button" @click="remove(todo)" :disabled="saving">
+            <button
+              class="danger"
+              type="button"
+              @click="remove(todo)"
+              :disabled="saving"
+            >
               Remove
             </button>
           </td>
         </tr>
       </tbody>
     </table>
+
+    <button
+      class="fadeIn success"
+      type="button"
+      v-if="!edit"
+      @click="edit = { task: '' }"
+      :disabled="saving"
+    >
+      Add New Task
+    </button>
+    <form class="fadeIn" v-if="edit">
+      <label v-if="edit.id == undefined">New Task: </label>
+      <label v-if="edit.id != undefined">Edit Task {{ edit.id }}: </label>
+      <input
+        type="text"
+        :value="edit.task"
+        @change="edit.task = $event.target.value"
+        :disabled="saving"
+      />
+      <button class="success" type="button" @click="save()" :disabled="saving">
+        Save
+      </button>
+      <button
+        class="info"
+        type="button"
+        @click="edit = null"
+        :disabled="saving"
+      >
+        Clear
+      </button>
+    </form>
   </div>
 </template>
 
 <script>
 import axios from "axios";
+import store from "../store";
 
 export default {
   name: "ToDoList",
@@ -71,11 +96,14 @@ export default {
   },
   methods: {
     async load() {
-      this.todos = [];
+      this.saving = true;
 
       const response = await axios.get("http://localhost:8081/api/todo");
+      store.state.todos = this.todos =
+        (response.data && response.data.todos) || [];
 
-      this.todos = (response.data && response.data.todos) || [];
+      this.saving = false;
+      this.edit = null;
     },
     async save() {
       if (!this.edit || this.saving) return;
@@ -83,10 +111,15 @@ export default {
 
       await axios.put(`http://localhost:8081/api/todo`, this.edit);
 
+      let index = this.todos.findIndex((t) => t.id == this.edit.id);
+      if (index > -1) this.todos.splice(index, 1);
+
+      this.edit.id = this.todos[this.todos.length - 1].id + 1;
+      this.todos.push(this.edit);
+
       this.saving = false;
       this.edit = null;
-
-      await this.load();
+      store.state.todos = this.todos;
     },
     async remove(todo) {
       if (this.saving) return;
@@ -94,9 +127,12 @@ export default {
 
       await axios.delete(`http://localhost:8081/api/todo/${todo.id}`);
 
-      this.saving = false;
+      let index = this.todos.findIndex((t) => t.id == todo.id);
+      this.todos.splice(index, 1);
 
-      await this.load();
+      this.saving = false;
+      this.edit = null;
+      store.state.todos = this.todos;
     },
   },
 };
@@ -105,14 +141,19 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 img {
-  width: 100px;
-  height: 100px;
+  display: inline;
+  width: 50px;
+  height: 50px;
 }
 
 table {
   border: 1px solid black;
-  margin-top: 5px;
+  margin-bottom: 10px;
   width: 900px;
+}
+
+th {
+  padding: 5px 0;
 }
 
 td {
@@ -125,12 +166,60 @@ td {
 }
 
 input {
-  min-width: 600px;
+  min-width: 650px;
   margin-right: 10px;
+  border-radius: 5px;
 }
 
 button {
   margin-left: 10px;
   margin-right: 10px;
+  padding: 5px 8px;
+}
+button:hover {
+  cursor: pointer;
+}
+
+.success {
+  background-color: lightgreen;
+  color: black;
+  border: 1px slategray solid;
+  border-radius: 5px;
+}
+.success:hover {
+  background-color: rgb(64, 189, 64);
+}
+
+.info {
+  background-color: lightskyblue;
+  color: black;
+  border: 1px slategray solid;
+  border-radius: 5px;
+}
+.info:hover {
+  background-color: rgb(77, 169, 226);
+}
+
+.danger {
+  background-color: lightcoral;
+  color: black;
+  border: 1px slategray solid;
+  border-radius: 5px;
+}
+.danger:hover {
+  background-color: rgb(217, 93, 93);
+}
+
+.fadeIn {
+  animation: fadeIn 1.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 </style>
