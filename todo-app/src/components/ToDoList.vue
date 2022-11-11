@@ -3,7 +3,7 @@
     <img alt="Vue logo" src="../assets/do-it-now.png" />
     <h1>
       List Of Items To-Do
-      <button type="button" @click="load()">Reload</button>
+      <button type="button" @click="load()" :disabled="saving">Reload</button>
     </h1>
     <div v-if="edit">
       <label v-if="edit.id == undefined">New Task: </label>
@@ -13,13 +13,13 @@
         :value="edit.task"
         @input="(event) => (edit.task = event.target.value)"
       />
-      <button type="button" @click="save()">Save</button>
-      <button type="button" @click="edit = null">Clear</button>
+      <button type="button" @click="save()" :disabled="saving">Save</button>
+      <button type="button" @click="edit = null" :disabled="saving">
+        Clear
+      </button>
     </div>
     <div v-if="!edit">
-      <button type="button" @click="edit = { id: undefined, task: '' }">
-        Add New Task
-      </button>
+      <button type="button" @click="edit = { task: '' }">Add New Task</button>
     </div>
     <table>
       <thead>
@@ -38,12 +38,15 @@
             <button
               type="button"
               @click="edit = { id: todo.id, task: todo.task }"
+              :disabled="saving"
             >
               Edit
             </button>
           </td>
           <td>
-            <button type="button" @click="remove(todo)">Remove</button>
+            <button type="button" @click="remove(todo)" :disabled="saving">
+              Remove
+            </button>
           </td>
         </tr>
       </tbody>
@@ -60,28 +63,40 @@ export default {
     return {
       edit: null,
       todos: [],
+      saving: false,
     };
   },
   mounted() {
     this.load();
   },
   methods: {
-    load() {
+    async load() {
       this.todos = [];
-      axios
-        .get("http://localhost:8081/api/todo")
-        .then((result) => {
-          console.log(result.data);
-          this.todos = (result.data && result.data.todos) || [];
-        })
-        .catch((error) => console.log(error));
+
+      const response = await axios.get("http://localhost:8081/api/todo");
+
+      this.todos = (response.data && response.data.todos) || [];
     },
-    save() {
-      console.log(this.edit);
+    async save() {
+      if (!this.edit || this.saving) return;
+      this.saving = true;
+
+      await axios.put(`http://localhost:8081/api/todo`, this.edit);
+
+      this.saving = false;
+      this.edit = null;
+
+      await this.load();
     },
-    remove(todo) {
-      let i = this.todos.findIndex((t) => t.id == todo.id);
-      if (i >= 0) this.todos.splice(i, 1);
+    async remove(todo) {
+      if (this.saving) return;
+      this.saving = true;
+
+      await axios.delete(`http://localhost:8081/api/todo/${todo.id}`);
+
+      this.saving = false;
+
+      await this.load();
     },
   },
 };
