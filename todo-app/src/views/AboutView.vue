@@ -17,5 +17,10 @@ export default {
       todos: store.state.todos,
     };
   },
+  mounted() {
+    setTimeout(() => {
+      this.todos = store.state.todos || [];
+    }, 250);
+  },
 };
 </script>

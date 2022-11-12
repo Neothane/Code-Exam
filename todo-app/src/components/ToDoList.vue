@@ -92,10 +92,14 @@ export default {
     };
   },
   mounted() {
-    this.load();
+    this.todos = store.state.todos || [];
+    setTimeout(() => {
+      this.todos = store.state.todos || [];
+    }, 250);
   },
   methods: {
     async load() {
+      if (this.saving) return;
       this.saving = true;
 
       const response = await axios.get("http://localhost:8081/api/todo");

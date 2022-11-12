@@ -6,6 +6,20 @@
   <router-view />
 </template>
 
+<script>
+import axios from "axios";
+import store from "./store";
+
+export default {
+  name: "App",
+  created() {
+    axios.get("http://localhost:8081/api/todo").then((response) => {
+      store.state.todos = (response.data && response.data.todos) || [];
+    });
+  },
+};
+</script>
+
 <style>
 html {
   height: 100vh;
