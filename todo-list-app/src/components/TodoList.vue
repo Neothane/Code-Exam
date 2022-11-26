@@ -32,7 +32,7 @@ export default {
             <input type="text" v-model="newTodo">
             <button>Add item</button>
         </form>
-        <ul>
+        <ul style="list-style-type:none">
             <li v-for="todo in todoList" :key="todo.id">
                 <input type="checkbox" v-model="todo.done">
                 <span :class="{ done: todo.done }">{{ todo.text }}</span>
