@@ -6,20 +6,51 @@ export default {
   data() {
     return {
         newTodo: "",
-        todoList: [
-            { id: id++, text: "Eat delicious Pakistani food", done: false},
-            { id: id++, text: "Eat delicious Thai food", done: false},
-            { id: id++, text: "Eat delicious Pakistani food", done: false}
+        todos: [
+            { id: id++, task: "Eat delicious Pakistani food" },
+            { id: id++, task: "Eat delicious Thai food" },
+            { id: id++, task: "Eat delicious Pakistani food" }
         ]
     }
   },
   methods: {
     addTodo() {
-        this.todoList.push({ id: id++, text: this.newTodo, done: false});
+        this.todos.push({ id: id++, task: this.newTodo });
         this.newTodo = "";
     },
     removeTodo(todo) {
-        this.todoList = this.todoList.filter((todoItem) => todoItem !== todo);
+        this.todos = this.todos.filter((todoItem) => todoItem !== todo);
+    },
+    async getData() {
+        const response = await fetch(
+            "https://illfatedlavendermemoryallocator--jabez007.repl.co/api/todo", {
+                method: "GET",
+                mode: "no-cors"
+            }
+        );
+        console.log(await response);
+    },
+    async putData() {
+        await fetch(
+            "https://illfatedlavendermemoryallocator--jabez007.repl.co/api/todo", {
+                method: "PUT"
+            }
+        );
+    },
+    async postData() {
+        const data = {
+            task: "test-task"
+        }
+        await fetch(
+            "https://illfatedlavendermemoryallocator--jabez007.repl.co/api/todo", {
+                method: "POST",
+                mode: "cors",
+                body: JSON.stringify(data)
+            }
+        );
+    },
+    async deleteData() {
+
     }
   }
 }
@@ -33,17 +64,15 @@ export default {
             <button>Add item</button>
         </form>
         <ul style="list-style-type:none">
-            <li v-for="todo in todoList" :key="todo.id">
-                <input type="checkbox" v-model="todo.done">
-                <span :class="{ done: todo.done }">{{ todo.text }}</span>
+            <li v-for="todo in todos" :key="todo.id">
+                <span>{{ todo.task }}</span>
                 <button @click="removeTodo(todo)">Remove</button>
             </li>
         </ul>
+        <h2>Operations</h2>
+        <button @click="getData">GET</button>
+        <button @click="postData">POST</button>
+        <button @click="putData">PUT</button>
+        <button @click="deleteData">DELETE</button>
     </div>
 </template>
-
-<style>
-.done {
-    text-decoration: line-through;
-}
-</style>
