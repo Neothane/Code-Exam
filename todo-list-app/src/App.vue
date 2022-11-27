@@ -1,6 +1,6 @@
 <template>
   <div>
-    <img alt="App image" src="./assets/do-all-the-things.jpg">
+    <img alt="App image" src="./assets/do-all-the-things.jpg" style="width: 20%; height: 20%">
     <figcaption>Image credit: Allie Brosh</figcaption>
     <TodoList />
   </div>
