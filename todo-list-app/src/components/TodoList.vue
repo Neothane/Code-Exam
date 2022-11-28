@@ -25,21 +25,17 @@ export default {
         const response = await fetch(
             "https://illfatedlavendermemoryallocator--jabez007.repl.co/api/todo", {
                 method: "GET",
-                mode: "no-cors"
+                mode: "cors",
+                credentials: "include",
+                referrer: "unsafe-url"
             }
         );
         console.log(await response);
+        response.getData()
     },
-    async putData() {
-        await fetch(
-            "https://illfatedlavendermemoryallocator--jabez007.repl.co/api/todo", {
-                method: "PUT"
-            }
-        );
-    },
-    async postData() {
+    async createTodo() {
         const data = {
-            task: "test-task"
+            task: this.newTodo
         }
         await fetch(
             "https://illfatedlavendermemoryallocator--jabez007.repl.co/api/todo", {
@@ -49,8 +45,24 @@ export default {
             }
         );
     },
-    async deleteData() {
-
+    async updateTodo(todo) {
+        const data = {
+            task: todo.task
+        }
+        await fetch(
+            `https://illfatedlavendermemoryallocator--jabez007.repl.co/api/todo/${todo.id}`, {
+                method: "PUT",
+                mode: "cors",
+                body: JSON.stringify(data)
+            }
+        );
+    },
+    async deleteTodo(todo) {
+        await fetch(
+            `https://illfatedlavendermemoryallocator--jabez007.repl.co/api/todo/${todo.id}`, {
+                method: "DELETE"
+            }
+        );
     }
   }
 }
@@ -58,21 +70,17 @@ export default {
 
 <template>
     <div>
-        <h1>Your todo list</h1>
         <form @submit.prevent="addTodo">
             <input type="text" v-model="newTodo">
             <button>Add item</button>
+            <!---- <button @click="createTodo">Add item</button> -->
         </form>
         <ul style="list-style-type:none">
             <li v-for="todo in todos" :key="todo.id">
                 <span>{{ todo.task }}</span>
-                <button @click="removeTodo(todo)">Remove</button>
+                <button @click="updateTodo(todo)">Update</button>
+                <button @click="deleteTodo(todo)">Remove</button>
             </li>
         </ul>
-        <h2>Operations</h2>
-        <button @click="getData">GET</button>
-        <button @click="postData">POST</button>
-        <button @click="putData">PUT</button>
-        <button @click="deleteData">DELETE</button>
     </div>
 </template>
