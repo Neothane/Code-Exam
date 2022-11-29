@@ -1,19 +1,20 @@
 <template>
   <div>
-    <img alt="App image" src="./assets/do-all-the-things.jpg" style="width: 20%; height: 20%">
-    <figcaption>Image credit: Allie Brosh</figcaption>
-    <h1>Your To Do list</h1>
+    <TodoImage />
+    <h1>Your to do list</h1>
     <TodoList />
   </div>
 </template>
 
 <script>
-import TodoList from './components/TodoList.vue'
+import TodoList from './components/TodoList.vue';
+import TodoImage from './components/TodoImage.vue';
 
 export default {
   name: 'App',
   components: {
-    TodoList
+    TodoList,
+    TodoImage
   }
 }
 </script>

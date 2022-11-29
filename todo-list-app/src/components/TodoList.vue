@@ -2,36 +2,28 @@
 let id = 0;
 
 export default {
-  name: 'TodoList',
+  name: "TodoList",
   data() {
     return {
         newTodo: "",
-        todos: [
-            { id: id++, task: "Eat delicious Pakistani food" },
-            { id: id++, task: "Eat delicious Thai food" },
-            { id: id++, task: "Eat delicious Pakistani food" }
-        ]
+        todos: []
     }
   },
   methods: {
-    addTodo() {
-        this.todos.push({ id: id++, task: this.newTodo });
-        this.newTodo = "";
-    },
-    removeTodo(todo) {
-        this.todos = this.todos.filter((todoItem) => todoItem !== todo);
-    },
-    async getData() {
+    async getTodos() {
         const response = await fetch(
             "https://illfatedlavendermemoryallocator--jabez007.repl.co/api/todo", {
                 method: "GET",
+                headers: {
+                    "Content-Type": "text/plain;charset=UTF-8"
+                },
                 mode: "cors",
-                credentials: "include",
-                referrer: "unsafe-url"
+                credentials: "include"
             }
         );
-        console.log(await response);
-        response.getData()
+        const todoList = response.getData().todos;
+        this.todos = todoList;
+        id = Math.max(this.todos.map(todo => todo.id ));
     },
     async createTodo() {
         const data = {
@@ -40,29 +32,48 @@ export default {
         await fetch(
             "https://illfatedlavendermemoryallocator--jabez007.repl.co/api/todo", {
                 method: "POST",
+                body: JSON.stringify(data),
+                headers: {
+                    "Content-Type": "text/plain;charset=UTF-8"
+                },
                 mode: "cors",
-                body: JSON.stringify(data)
+                credentials: "include"
             }
         );
+        this.addTodo();
     },
     async updateTodo(todo) {
         const data = {
             task: todo.task
         }
         await fetch(
-            `https://illfatedlavendermemoryallocator--jabez007.repl.co/api/todo/${todo.id}`, {
+            `https://illfatedlavendermemoryallocator--jabez007.repl.co/api/todo/:${todo.id}`, {
                 method: "PUT",
+                body: JSON.stringify(data),
+                headers: {
+                    "Content-Type": "text/plain;charset=UTF-8"
+                },
                 mode: "cors",
-                body: JSON.stringify(data)
+                credentials: "include"
             }
         );
     },
     async deleteTodo(todo) {
         await fetch(
-            `https://illfatedlavendermemoryallocator--jabez007.repl.co/api/todo/${todo.id}`, {
-                method: "DELETE"
+            `https://illfatedlavendermemoryallocator--jabez007.repl.co/api/todo/:${todo.id}`, {
+                method: "DELETE",
+                mode: "cors",
+                credentials: "include"
             }
         );
+        this.removeTodo(todo);
+    },
+    addTodo() {
+        this.todos.push({ id: id++, task: this.newTodo });
+        this.newTodo = "";
+    },
+    removeTodo(todo) {
+        this.todos = this.todos.filter((todoItem) => todoItem !== todo);
     }
   }
 }
@@ -70,17 +81,17 @@ export default {
 
 <template>
     <div>
-        <form @submit.prevent="addTodo">
-            <input type="text" v-model="newTodo">
+        <form @submit.prevent="createTodo">
+            <input v-model="newTodo">
             <button>Add item</button>
-            <!---- <button @click="createTodo">Add item</button> -->
         </form>
         <ul style="list-style-type:none">
             <li v-for="todo in todos" :key="todo.id">
-                <span>{{ todo.task }}</span>
+                <input v-model="todo.task">
                 <button @click="updateTodo(todo)">Update</button>
                 <button @click="deleteTodo(todo)">Remove</button>
             </li>
         </ul>
+        <button @click="getTodos">Populate to do list</button>
     </div>
 </template>
